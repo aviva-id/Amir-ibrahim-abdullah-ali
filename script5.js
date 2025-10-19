@@ -21,18 +21,6 @@ document.getElementById('saveBalance').addEventListener('click', () => {
   }
 });
 
-// contoh update manual:
-function updateChart(days, values) {
-  progressChart.data.labels = days;   // misal [1, 2, 3, 4]
-  progressChart.data.datasets[0].data = values; // misal [1000, 2000, 1500, 3000]
-  progressChart.update();
-}
-
-// contoh update manual:
-
-
-
-
 // === DAY DATA MANAGEMENT ===
 const dayCards = document.querySelectorAll('.card');
 dayCards.forEach(card => {
@@ -57,62 +45,41 @@ dayCards.forEach(card => {
 });
 
 // === CHART.JS ===
-// === Membuat Chart Harian (tanpa interpolasi) ===
 const ctx = document.getElementById('progressChart').getContext('2d');
-const progressChart = new Chart(ctx, {
+const getTotals = () => [1,2,3,4,5].map(i => {
+  const data = JSON.parse(localStorage.getItem(`day${i}`)) || { income: 0, expense: 0 };
+  return data.income - data.expense;
+});
+
+let progressChart = new Chart(ctx, {
   type: 'line',
   data: {
-    labels: [1, 2, 3, 4, 5, 6], // nanti diisi hari ke-1, ke-2, dst
+    labels: ['1 Day','2 Day','3 Day','4 Day','5 Day'],
     datasets: [{
-      label: 'Saldo (Rp)',
-      data: [],
+      label: 'Saldo Harian (Rp)',
+      data: getTotals(),
       borderColor: '#00ff88',
-      backgroundColor: 'rgba(0,255,136,0.1)',
+      backgroundColor: 'rgba(0,255,136,0.2)',
       fill: true,
-      tension: 0,         // 🔹 Hilangkan kurva halus (garis lurus antar titik)
-      pointRadius: 5,     // 🔹 Perbesar titik data
+      tension: 0.4,
       pointBackgroundColor: '#00ff88'
     }]
   },
   options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#e0e0e0' } } },
     scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Hari ke-',
-          color: '#0f0'
-        },
-        ticks: {
-          color: '#fff'
-        },
-        grid: {
-          color: 'rgba(255,255,255,0.1)'
-        }
-      },
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Saldo (Rp)',
-          color: '#0f0'
-        },
-        ticks: {
-          color: '#fff'
-        },
-        grid: {
-          color: 'rgba(255,255,255,0.1)'
-        }
-      }
-    },
-    plugins: {
-      legend: {
-        labels: {
-          color: '#fff'
-        }
-      }
+      x: { ticks: { color: '#ccc' }, grid: { color: '#333' } },
+      y: { ticks: { color: '#ccc' }, grid: { color: '#333' } }
     }
   }
 });
+
+function updateChart() {
+  progressChart.data.datasets[0].data = getTotals();
+  progressChart.update();
+}
 
 // === PROGRESS GOAL ===
 const progressList = document.getElementById('progressList');
